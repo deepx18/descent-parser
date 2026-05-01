@@ -52,9 +52,9 @@ Node *init_tree() {
 void dump_tree(Node *r, int level) {
     if (r == NULL) return;
     for (int i = 0; i < level; i++) {
-        printf("-");
+        printf("=");
     }
-    if (level != 0) printf(" ");
+    if (level != 0) printf("> ");
 
     printf("%s\n", r->value->value);
     if (r->left != NULL) dump_tree(r->left, level + 1);
