@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -36,24 +37,47 @@ void insert_token(Lexer *lexer, TokenKind kind, char *value, int pr) {
     return;
 }
 void get_tokens(Lexer *lexer, char src[]) {
-    char *tok;
-    tok = strtok(src, " ");
-
-    while (tok != NULL) {
-        if (strcmp(tok, "+") == 0) {
-            insert_token(lexer, Plus, tok, 1);
-        } else if (strcmp(tok, "-") == 0) {
-            insert_token(lexer, Minus, tok, 1);
-        } else if (strcmp(tok, "*") == 0) {
-            insert_token(lexer, Star, tok, 2);
-        } else if (strcmp(tok, "/") == 0) {
-            insert_token(lexer, Slash, tok, 2);
+    size_t src_len = strlen(src);
+    for (int i = 0; i < src_len; i++) {
+        char tok = src[i];
+        if (tok == '+') {
+            insert_token(lexer, Plus, "+", 1);
+        } else if (tok == '-') {
+            insert_token(lexer, Minus, "/", 1);
+        } else if (tok == '*') {
+            insert_token(lexer, Star, "*", 2);
+        } else if (tok == '/') {
+            insert_token(lexer, Slash, "/", 2);
+        } else if (tok == ' ' || tok == '\n') {
+            continue;
         } else {
-            insert_token(lexer, Number, tok, 0);
+            int start = i;
+            while (isdigit((int)src[++i]) != 0);
+            char *num = malloc(sizeof(char) * (i - start));
+            strncpy( num, src + start, i-- - start);
+            insert_token(lexer, Number, num, 0);
         }
 
-        tok = strtok(NULL, " ");
     }
+
+    // changed tokenization method from striping by space to actualy verifying every char and constructing tokens based on that
+    // char *tok;
+    // tok = strtok(src, "");
+    // while (tok != NULL) {
+    //     // if (strcmp(tok, "+") == 0) {
+    //     //     insert_token(lexer, Plus, tok, 1);
+    //     // } else if (strcmp(tok, "-") == 0) {
+    //     //     insert_token(lexer, Minus, tok, 1);
+    //     // } else if (strcmp(tok, "*") == 0) {
+    //     //     insert_token(lexer, Star, tok, 2);
+    //     // } else if (strcmp(tok, "/") == 0) {
+    //     //     insert_token(lexer, Slash, tok, 2);
+    //     // } else {
+    //     //     insert_token(lexer, Number, tok, 0);
+    //     // }
+    //     printf("TOKEN: [%s]", tok);
+    //     tok = strtok(NULL, " ");
+    // }
 
     return;
 }
@@ -61,7 +85,6 @@ Token *peek_token(Lexer *lexer, size_t offset){
     if (lexer->idx + offset < lexer->count) return lexer->tokens[lexer->idx+offset];
     return NULL;
 }
-
 Token *get_token(Lexer *lexer) {
     if (lexer->idx < lexer->count) return lexer->tokens[lexer->idx++];
     return NULL;
